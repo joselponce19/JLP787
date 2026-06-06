@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tijuana Tacos — Menú</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f4f0;
+      --surface: #ffffff;
+      --surface2: #f0ece6;
+      --border: #e4dfd8;
+      --text: #1c1a17;
+      --text2: #7a756e;
+      --text3: #b5b0a8;
+      --accent: #c8390a;
+      --accent2: #a62e08;
+      --radius: 8px;
+      --success: #2d7a4f;
+      --danger: #c0392b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+    /* ── PUBLIC MENU ── */
+    #public-menu { display: none; min-height: 100vh; }
+
+    .pub-header {
+      background: var(--text);
+      padding: 28px 24px 22px;
+      text-align: center;
+    }
+    .pub-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px; font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #fff;
+    }
+    .pub-logo span { color: var(--accent); }
+    .pub-tagline {
+      font-size: 11px; color: rgba(255,255,255,0.45);
+      letter-spacing: 0.1em; text-transform: uppercase;
+      margin-top: 5px; font-weight: 300;
+    }
+
+    .pub-cats {
+      display: flex; gap: 6px;
+      padding: 12px 16px;
+      overflow-x: auto;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 5;
+    }
+    .pub-cats::-webkit-scrollbar { display: none; }
+
+    .pub-cat-btn {
+      background: none; border: 1px solid var(--border);
+      color: var(--text2); padding: 6px 14px;
+      border-radius: 100px; font-family: 'Inter', sans-serif;
+      font-size: 12px; font-weight: 400;
+      cursor: pointer; white-space: nowrap; transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .pub-cat-btn.active, .pub-cat-btn:hover {
+      background: var(--accent); border-color: var(--accent); color: #fff;
+    }
+
+    .pub-content { padding: 24px 16px; max-width: 680px; margin: 0 auto; }
+
+    .pub-section { margin-bottom: 36px; }
+
+    .pub-section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text2); margin-bottom: 4px;
+    }
+
+    .pub-section-note {
+      font-size: 11px; color: var(--text3);
+      margin-bottom: 12px; font-weight: 300;
+      font-style: italic;
+    }
+
+    .pub-items {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+    }
+
+    .pub-item {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; gap: 16px;
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .pub-item:last-child { border-bottom: none; }
+
+    .pub-item-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 13px; font-weight: 600;
+      letter-spacing: -0.01em; line-height: 1.3;
+    }
+
+    .pub-item-note {
+      font-size: 11px; color: var(--text3);
+      margin-top: 2px; font-weight: 300;
+    }
+
+    .pub-item-price {
+      font-family: 'Syne', sans-serif;
+      font-size: 13px; font-weight: 700;
+      color: var(--text); flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .pub-footer {
+      text-align: center; padding: 24px 16px;
+      border-top: 1px solid var(--border);
+    }
+    .pub-footer p { font-size: 11px; color: var(--text3); }
+    .pub-footer a { color: var(--text2); text-decoration: none; font-weight: 500; }
+
+    /* ── ADMIN ── */
+    #admin { display: none; min-height: 100vh; }
+
+    .admin-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px; height: 56px;
+      display: flex; align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 10;
+    }
+
+    .admin-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px; font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .admin-logo span { color: var(--accent); }
+
+    .admin-nav { display: flex; gap: 2px; }
+    .admin-tab {
+      background: none; border: none;
+      color: var(--text2); padding: 6px 14px;
+      border-radius: 6px; font-family: 'Inter', sans-serif;
+      font-size: 13px; font-weight: 400;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .admin-tab:hover { color: var(--text); background: var(--surface2); }
+    .admin-tab.active { color: var(--text); font-weight: 500; background: var(--surface2); }
+
+    .admin-right { display: flex; gap: 8px; align-items: center; }
+
+    .btn-sm {
+      background: none; border: 1px solid var(--border);
+      color: var(--text2); padding: 5px 12px;
+      border-radius: 6px; font-family: 'Inter', sans-serif;
+      font-size: 12px; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-sm:hover { border-color: var(--text); color: var(--text); }
+    .btn-sm.primary { background: var(--text); color: #fff; border-color: var(--text); }
+    .btn-sm.primary:hover { opacity: 0.8; }
+    .btn-sm.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+    .admin-content { padding: 32px; max-width: 1000px; margin: 0 auto; }
+
+    @media (max-width: 600px) {
+      .admin-header { padding: 0 16px; }
+      .admin-content { padding: 20px 16px; }
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .section-header {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px; font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .btn-add {
+      background: var(--text); color: #fff;
+      border: none; padding: 9px 16px;
+      border-radius: var(--radius);
+      font-family: 'Inter', sans-serif;
+      font-weight: 500; font-size: 13px;
+      cursor: pointer; display: flex;
+      align-items: center; gap: 6px;
+      transition: opacity 0.15s;
+    }
+    .btn-add:hover { opacity: 0.8; }
+
+    /* Items table */
+    .items-table {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .table-cat-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .table-cat-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text2);
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .cnt {
+      background: var(--border); color: var(--text3);
+      font-size: 10px; padding: 1px 7px;
+      border-radius: 100px; font-family: 'Inter', sans-serif;
+      font-weight: 500; letter-spacing: 0; text-transform: none;
+    }
+
+    .table-row {
+      display: flex; align-items: center;
+      gap: 12px; padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+    .table-row:last-child { border-bottom: none; }
+    .table-row:hover { background: var(--surface2); }
+
+    .row-name { flex: 1; font-size: 13px; font-weight: 500; }
+    .row-note { font-size: 11px; color: var(--text3); font-weight: 300; }
+    .row-price { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; flex-shrink: 0; min-width: 70px; text-align: right; }
+    .row-actions { display: flex; gap: 4px; flex-shrink: 0; }
+
+    .btn-icon {
+      background: none; border: 1px solid var(--border);
+      color: var(--text3); width: 28px; height: 28px;
+      border-radius: 6px; display: flex;
+      align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+    }
+    .btn-icon:hover { border-color: var(--text); color: var(--text); background: var(--surface2); }
+    .btn-icon.danger:hover { border-color: var(--danger); color: var(--danger); background: #fdf0ef; }
+
+    /* QR tab */
+    .qr-grid { display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: start; }
+    @media (max-width: 600px) { .qr-grid { grid-template-columns: 1fr; } }
+
+    .qr-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 28px;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 16px;
+    }
+
+    #qr-display { background: white; padding: 14px; border-radius: 8px; border: 1px solid var(--border); }
+
+    .menu-url {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 8px 12px;
+      font-size: 11px; color: var(--text2);
+      word-break: break-all; text-align: center;
+      width: 100%; font-family: monospace;
+    }
+
+    .qr-btns { display: flex; gap: 8px; width: 100%; }
+    .btn-outline {
+      flex: 1; background: none; border: 1px solid var(--border);
+      color: var(--text2); padding: 8px 4px;
+      border-radius: var(--radius); font-family: 'Inter', sans-serif;
+      font-size: 11px; font-weight: 500;
+      cursor: pointer; transition: all 0.15s; text-align: center;
+    }
+    .btn-outline:hover { border-color: var(--text); color: var(--text); }
+
+    .qr-tips {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 24px;
+    }
+    .qr-tips h3 {
+      font-family: 'Syne', sans-serif; font-size: 13px;
+      font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--text2);
+      margin-bottom: 18px;
+    }
+    .tip { display: flex; gap: 12px; margin-bottom: 14px; }
+    .tip:last-child { margin-bottom: 0; }
+    .tip-num { font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 800; color: var(--text3); min-width: 20px; padding-top: 1px; }
+    .tip-text h4 { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+    .tip-text p { font-size: 12px; color: var(--text2); line-height: 1.5; font-weight: 300; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(247,244,240,0.88);
+      backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100; padding: 20px;
+    }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 36px;
+      width: 100%; max-width: 420px;
+      position: relative;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+    }
+    .modal-close {
+      position: absolute; top: 14px; right: 14px;
+      background: none; border: none; color: var(--text3);
+      cursor: pointer; font-size: 20px; line-height: 1;
+      width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; transition: color 0.15s;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal h2 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 4px; }
+    .modal-sub { color: var(--text2); font-size: 13px; margin-bottom: 24px; font-weight: 300; }
+
+    .form-group { margin-bottom: 13px; }
+    .form-group label { display: block; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); margin-bottom: 6px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); padding: 10px 12px;
+      border-radius: var(--radius); font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 300;
+      transition: border-color 0.15s; outline: none;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--text); }
+    .form-group textarea { resize: vertical; min-height: 70px; }
+
+    .btn-full {
+      width: 100%; background: var(--text); color: #fff;
+      border: none; padding: 12px;
+      border-radius: var(--radius); font-family: 'Inter', sans-serif;
+      font-weight: 500; font-size: 14px;
+      cursor: pointer; transition: opacity 0.15s; margin-top: 4px;
+    }
+    .btn-full:hover { opacity: 0.8; }
+
+    .auth-switch { text-align: center; margin-top: 14px; font-size: 13px; color: var(--text2); font-weight: 300; }
+    .auth-switch a { color: var(--text); cursor: pointer; font-weight: 500; }
+
+    .error-msg { background: #fdf0ef; border: 1px solid #f5c6c2; color: var(--danger); padding: 8px 12px; border-radius: var(--radius); font-size: 12px; margin-bottom: 12px; }
+
+    /* Login page */
+    #login-page {
+      display: none; min-height: 100vh;
+      align-items: center; justify-content: center;
+      background: var(--bg); padding: 20px;
+    }
+
+    .login-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 40px;
+      width: 100%; max-width: 380px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.06);
+    }
+
+    .login-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px; font-weight: 800;
+      letter-spacing: -0.02em; margin-bottom: 4px;
+    }
+    .login-logo span { color: var(--accent); }
+
+    .login-sub { font-size: 13px; color: var(--text2); font-weight: 300; margin-bottom: 28px; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--text); color: #fff;
+      padding: 10px 20px; border-radius: 100px;
+      font-size: 13px; font-weight: 500;
+      z-index: 999; transition: transform 0.25s;
+      white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+
+    .hidden { display: none !important; }
+    select option { background: white; }
+  </style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="login-page" style="display:flex;">
+  <div class="login-box">
+    <div class="login-logo">Tijuana<span>Tacos</span></div>
+    <div class="login-sub">Panel de administración</div>
+    <div id="login-error" class="error-msg hidden"></div>
+    <div class="form-group">
+      <label>Correo</label>
+      <input type="email" id="login-email" placeholder="admin@tijuanatacos.cl" />
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" id="login-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleLogin()" />
+    </div>
+    <button class="btn-full" onclick="handleLogin()">Ingresar</button>
+    <div style="margin-top:20px;text-align:center;">
+      <a href="?menu=tijuana-tacos" style="font-size:13px;color:var(--text2);text-decoration:none;">Ver menú público →</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN ═══ -->
+<div id="admin">
+  <header class="admin-header">
+    <div style="display:flex;align-items:center;gap:24px;">
+      <div class="admin-logo">Tijuana<span>Tacos</span></div>
+      <nav class="admin-nav">
+        <button class="admin-tab active" onclick="showTab('items')" data-tab="items">Menú</button>
+        <button class="admin-tab" onclick="showTab('qr')" data-tab="qr">Código QR</button>
+      </nav>
+    </div>
+    <div class="admin-right">
+      <button class="btn-sm" onclick="window.open('?menu=tijuana-tacos','_blank')">Ver menú</button>
+      <button class="btn-sm danger" onclick="handleLogout()">Salir</button>
+    </div>
+  </header>
+  <div class="admin-content">
+
+    <!-- ITEMS TAB -->
+    <div class="tab-panel active" id="tab-items">
+      <div class="section-header">
+        <h2 class="section-title">Menú</h2>
+        <button class="btn-add" onclick="showAddItem()">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Agregar plato
+        </button>
+      </div>
+      <div id="items-list"></div>
+    </div>
+
+    <!-- QR TAB -->
+    <div class="tab-panel" id="tab-qr">
+      <div class="section-header">
+        <h2 class="section-title">Código QR</h2>
+      </div>
+      <div class="qr-grid">
+        <div class="qr-card">
+          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;">Tu menú en QR</div>
+          <div id="qr-display"></div>
+          <div class="menu-url" id="menu-url-txt">—</div>
+          <div class="qr-btns">
+            <button class="btn-outline" onclick="downloadQR()">Descargar</button>
+            <button class="btn-outline" onclick="copyLink()">Copiar link</button>
+            <button class="btn-outline" onclick="whatsapp()">WhatsApp</button>
+          </div>
+        </div>
+        <div class="qr-tips">
+          <h3>Cómo usar</h3>
+          <div class="tip"><div class="tip-num">01</div><div class="tip-text"><h4>Imprime el QR</h4><p>Descárgalo e imprímelo. Ponlo en las mesas, en el mostrador o en la puerta.</p></div></div>
+          <div class="tip"><div class="tip-num">02</div><div class="tip-text"><h4>Instagram</h4><p>Agrega el link a tu bio de Instagram para que tus seguidores vean el menú.</p></div></div>
+          <div class="tip"><div class="tip-num">03</div><div class="tip-text"><h4>WhatsApp</h4><p>Envía el link directo a clientes que pregunten qué hay en el menú.</p></div></div>
+          <div class="tip"><div class="tip-num">04</div><div class="tip-text"><h4>Siempre actualizado</h4><p>Cada vez que edites el menú, el QR muestra la versión más reciente.</p></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ ITEM MODAL ═══ -->
+<div id="item-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <h2 id="modal-title">Agregar plato</h2>
+    <p class="modal-sub">Completa los datos del plato</p>
+    <input type="hidden" id="edit-id" />
+    <div class="form-group">
+      <label>Nombre</label>
+      <input type="text" id="f-name" placeholder="ej. Taco de Birria" />
+    </div>
+    <div class="form-group">
+      <label>Categoría</label>
+      <select id="f-cat">
+        <option value="Tacos de Tijuana">Tacos de Tijuana</option>
+        <option value="Quesatacos">Quesatacos</option>
+        <option value="Nachos">Nachos</option>
+        <option value="Burros">Burros</option>
+        <option value="Mulas">Mulas</option>
+        <option value="Mas Tacos">Mas Tacos</option>
+        <option value="Caldos">Caldos</option>
+        <option value="Salsas Extras">Salsas Extras</option>
+        <option value="Cheves (Cervezas)">Cheves (Cervezas)</option>
+        <option value="Michelados">Michelados</option>
+        <option value="Drinks Basicos">Drinks Basicos</option>
+        <option value="Bebidas / Té">Bebidas / Té</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Nota <span style="color:var(--text3);font-weight:300;text-transform:none;letter-spacing:0;">(opcional)</span></label>
+      <input type="text" id="f-note" placeholder="ej. con queso, pica suave..." />
+    </div>
+    <div class="form-group">
+      <label>Precio (CLP)</label>
+      <input type="number" id="f-price" placeholder="2500" step="100" min="0" />
+    </div>
+    <button class="btn-full" onclick="saveItem()">Guardar</button>
+  </div>
+</div>
+
+<!-- ═══ PUBLIC MENU ═══ -->
+<div id="public-menu">
+  <div class="pub-header">
+    <div class="pub-logo">Tijuana<span>Tacos</span></div>
+    <div class="pub-tagline">Santiago, Chile</div>
+  </div>
+  <div class="pub-cats" id="pub-cats"></div>
+  <div class="pub-content" id="pub-content"></div>
+  <div class="pub-footer">
+    <p>Menú digital por <a href="/">MenuQR</a></p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+// ── CREDENTIALS (change these) ──
+const ADMIN_EMAIL = 'admin@tijuanatacos.cl';
+const ADMIN_PASS  = 'tijuana2024';
+
+// ── CATEGORY ORDER ──
+const CAT_ORDER = [
+  'Tacos de Tijuana','Quesatacos','Nachos','Burros','Mulas',
+  'Mas Tacos','Caldos','Salsas Extras',
+  'Cheves (Cervezas)','Michelados','Drinks Basicos','Bebidas / Té'
+];
+
+const CAT_NOTES = {
+  'Tacos de Tijuana': 'casi todos en tortilla de maíz, con cebolla, cilantro, frijol y su salsa',
+  'Quesatacos': 'doble tortilla de maíz, cebolla, cilantro y su salsa',
+  'Nachos': 'con queso, cebolla, tomate, cilantro, crema y salsa de palta',
+  'Burros': 'con frijol, pico de gallo, salsas y palta — con queso +$2.000 — carne extra +$2.000',
+  'Mulas': 'con queso, frijol, cebolla, cilantro, salsas y palta',
+};
+
+// ── DEFAULT MENU DATA ──
+const DEFAULT_ITEMS = [
+  // Tacos de Tijuana
+  {id:'1',cat:'Tacos de Tijuana',name:'Birria (mechada pica)',note:'',price:2500},
+  {id:'2',cat:'Tacos de Tijuana',name:'Adobada (cerdo)',note:'',price:2500},
+  {id:'3',cat:'Tacos de Tijuana',name:'Asada',note:'',price:2500},
+  {id:'4',cat:'Tacos de Tijuana',name:'Pollo o Lengua',note:'',price:2500},
+  {id:'5',cat:'Tacos de Tijuana',name:'Chorizo',note:'solo en Vitacura y Ñuñoa',price:2500},
+  {id:'6',cat:'Tacos de Tijuana',name:'Tripa',note:'',price:2500},
+  {id:'7',cat:'Tacos de Tijuana',name:'Champiñón o Queso',note:'',price:2500},
+  {id:'8',cat:'Tacos de Tijuana',name:'Tomate Asado',note:'',price:2500},
+  {id:'9',cat:'Tacos de Tijuana',name:'Miniquesabirria',note:'',price:3500},
+  {id:'10',cat:'Tacos de Tijuana',name:'Campechano x2',note:'',price:8000},
+  {id:'11',cat:'Tacos de Tijuana',name:'Camarón Enchilado x2',note:'en tortilla de trigo, pica suave',price:8000},
+  {id:'12',cat:'Tacos de Tijuana',name:'Mar y Tierra x2',note:'en tortilla de trigo, pica suave',price:9000},
+  {id:'13',cat:'Tacos de Tijuana',name:'Mar y Birria x2',note:'en tortilla de trigo, pica suave',price:9000},
+  // Quesatacos
+  {id:'14',cat:'Quesatacos',name:'Birria (mechada pica)',note:'',price:4500},
+  {id:'15',cat:'Quesatacos',name:'Adobada (cerdo)',note:'',price:4500},
+  {id:'16',cat:'Quesatacos',name:'Asada (bisteck)',note:'',price:4500},
+  {id:'17',cat:'Quesatacos',name:'Pollo',note:'',price:4500},
+  {id:'18',cat:'Quesatacos',name:'Lengua',note:'',price:4500},
+  {id:'19',cat:'Quesatacos',name:'Chorizo',note:'solo en Vitacura y Ñuñoa',price:4500},
+  {id:'20',cat:'Quesatacos',name:'Tripa',note:'',price:4500},
+  {id:'21',cat:'Quesatacos',name:'Champiñón',note:'',price:4500},
+  {id:'22',cat:'Quesatacos',name:'Tomate',note:'',price:4500},
+  {id:'23',cat:'Quesatacos',name:'Camarón Enchilado',note:'',price:5500},
+  {id:'24',cat:'Quesatacos',name:'Mar y Birria (con chile)',note:'',price:6500},
+  {id:'25',cat:'Quesatacos',name:'Mar y Tierra (con chile)',note:'',price:6500},
+  {id:'26',cat:'Quesatacos',name:'Campechano',note:'dos carnes, queso, tortilla maíz',price:6500},
+  // Nachos
+  {id:'27',cat:'Nachos',name:'Nacho Guacamole',note:'',price:5500},
+  {id:'28',cat:'Nachos',name:'Birria (carne pica)',note:'',price:10000},
+  {id:'29',cat:'Nachos',name:'Adobada (cerdo)',note:'',price:10000},
+  {id:'30',cat:'Nachos',name:'Asada (bisteck)',note:'',price:10000},
+  {id:'31',cat:'Nachos',name:'Lengua',note:'',price:10000},
+  {id:'32',cat:'Nachos',name:'Pollo',note:'',price:10000},
+  {id:'33',cat:'Nachos',name:'Chorizo',note:'solo en Vitacura y Ñuñoa',price:10000},
+  {id:'34',cat:'Nachos',name:'Tripa',note:'',price:10000},
+  {id:'35',cat:'Nachos',name:'Champiñón o Tomate',note:'',price:10000},
+  {id:'36',cat:'Nachos',name:'Camarón Enchilado',note:'',price:11000},
+  {id:'37',cat:'Nachos',name:'Mar y Birria',note:'',price:12900},
+  {id:'38',cat:'Nachos',name:'Mar y Tierra',note:'',price:12900},
+  {id:'39',cat:'Nachos',name:'Medio Nacho',note:'',price:7500},
+  // Burros
+  {id:'40',cat:'Burros',name:'Birria (mechada)',note:'',price:9500},
+  {id:'41',cat:'Burros',name:'Adobada (cerdo)',note:'',price:9500},
+  {id:'42',cat:'Burros',name:'Asada (bisteck)',note:'',price:9500},
+  {id:'43',cat:'Burros',name:'Pollo',note:'',price:9500},
+  {id:'44',cat:'Burros',name:'Lengua',note:'',price:9500},
+  {id:'45',cat:'Burros',name:'Chorizo o Tripa',note:'',price:9500},
+  {id:'46',cat:'Burros',name:'Champiñón',note:'',price:9500},
+  {id:'47',cat:'Burros',name:'Tomate Asado',note:'',price:9500},
+  {id:'48',cat:'Burros',name:'Camarón Enchilado',note:'pica y con queso',price:11000},
+  {id:'49',cat:'Burros',name:'Burro Mar y Birria',note:'pica y con queso',price:12500},
+  // Mulas
+  {id:'50',cat:'Mulas',name:'Birria (mechada pica)',note:'',price:14000},
+  {id:'51',cat:'Mulas',name:'Adobada (cerdo)',note:'',price:14000},
+  {id:'52',cat:'Mulas',name:'Asada (bisteck)',note:'',price:14000},
+  {id:'53',cat:'Mulas',name:'Pollo',note:'',price:14000},
+  {id:'54',cat:'Mulas',name:'Lengua',note:'',price:14000},
+  {id:'55',cat:'Mulas',name:'Chorizo',note:'solo en Vitacura y Ñuñoa',price:14000},
+  {id:'56',cat:'Mulas',name:'Tripa',note:'',price:14000},
+  {id:'57',cat:'Mulas',name:'Champiñón',note:'',price:14000},
+  {id:'58',cat:'Mulas',name:'Tomate',note:'',price:14000},
+  {id:'59',cat:'Mulas',name:'Camarón Enchilado',note:'',price:16000},
+  {id:'60',cat:'Mulas',name:'Mula Mar y Birria',note:'',price:16000},
+  // Mas Tacos
+  {id:'61',cat:'Mas Tacos',name:'Box 6 Tacos (1 carne)',note:'',price:18000},
+  {id:'62',cat:'Mas Tacos',name:'Todo Birria',note:'caldo, miniquesabirria y 2 tacos',price:13000},
+  {id:'63',cat:'Mas Tacos',name:'Tortillas Maíz 12u',note:'',price:6000},
+  {id:'64',cat:'Mas Tacos',name:'Nachos (100% maíz)',note:'',price:9000},
+  // Caldos
+  {id:'65',cat:'Caldos',name:'Caldo de Birria (Consomé)',note:'',price:2500},
+  {id:'66',cat:'Caldos',name:'Caldo Birria para llevar',note:'',price:3000},
+  {id:'67',cat:'Caldos',name:'Caldo Birria Preparado',note:'con carne, totopos, cebolla, cilantro, frijol, tortilla y palta',price:5000},
+  // Salsas Extras
+  {id:'68',cat:'Salsas Extras',name:'Salsa Roja (no pica)',note:'',price:1500},
+  {id:'69',cat:'Salsas Extras',name:'Salsa Verde / Frijol',note:'',price:1500},
+  {id:'70',cat:'Salsas Extras',name:'Crema de Palta',note:'',price:1500},
+  {id:'71',cat:'Salsas Extras',name:'Pico de Gallo',note:'',price:1500},
+  {id:'72',cat:'Salsas Extras',name:'Mayo Chipotle',note:'',price:1500},
+  {id:'73',cat:'Salsas Extras',name:'Salsa Pica Pica',note:'',price:1500},
+  {id:'74',cat:'Salsas Extras',name:'Salsa Macha',note:'',price:2000},
+  {id:'75',cat:'Salsas Extras',name:'Chiles Asados',note:'',price:2000},
+  {id:'76',cat:'Salsas Extras',name:'Guacamole',note:'',price:2000},
+  {id:'77',cat:'Salsas Extras',name:'Queso',note:'',price:2000},
+  // Cervezas
+  {id:'78',cat:'Cheves (Cervezas)',name:'Schop (pinta)',note:'',price:4500},
+  {id:'79',cat:'Cheves (Cervezas)',name:'Corona',note:'',price:3000},
+  {id:'80',cat:'Cheves (Cervezas)',name:'Jester-Loa-Alameda',note:'',price:5500},
+  {id:'81',cat:'Cheves (Cervezas)',name:'Sin Alcohol',note:'',price:3500},
+  // Michelados
+  {id:'82',cat:'Michelados',name:'Vaso Michelado',note:'',price:1500},
+  {id:'83',cat:'Michelados',name:'Vaso Miche Clamato',note:'',price:1500},
+  {id:'84',cat:'Michelados',name:'Vaso Miche Chamoy',note:'',price:1500},
+  {id:'85',cat:'Michelados',name:'Vaso con Todo',note:'',price:2000},
+  // Drinks
+  {id:'86',cat:'Drinks Basicos',name:'Margarita',note:'',price:5500},
+  {id:'87',cat:'Drinks Basicos',name:'Margarita Jamaica',note:'',price:6500},
+  {id:'88',cat:'Drinks Basicos',name:'Spicy Margarita',note:'',price:7000},
+  {id:'89',cat:'Drinks Basicos',name:'Margarita Herradura',note:'',price:10000},
+  {id:'90',cat:'Drinks Basicos',name:'Mezcalita',note:'con mezcal de Oaxaca',price:12000},
+  {id:'91',cat:'Drinks Basicos',name:'Paloma',note:'',price:3000},
+  {id:'92',cat:'Drinks Basicos',name:'Pisco Sour',note:'',price:6000},
+  {id:'93',cat:'Drinks Basicos',name:'Piscola 35',note:'',price:4500},
+  {id:'94',cat:'Drinks Basicos',name:'Gin',note:'',price:5500},
+  {id:'95',cat:'Drinks Basicos',name:'Piscola 40',note:'',price:5500},
+  {id:'96',cat:'Drinks Basicos',name:'Corto Tequila',note:'',price:3000},
+  {id:'97',cat:'Drinks Basicos',name:'Corto Tequila Herradura',note:'',price:6000},
+  {id:'98',cat:'Drinks Basicos',name:'Corto Mezcal',note:'',price:7000},
+  // Bebidas
+  {id:'99',cat:'Bebidas / Té',name:'Bebidas / Agua / Té',note:'',price:2200},
+  {id:'100',cat:'Bebidas / Té',name:'Agua de Jamaica',note:'',price:2200},
+  {id:'101',cat:'Bebidas / Té',name:'Jamaica Grande',note:'',price:4000},
+  {id:'102',cat:'Bebidas / Té',name:'Limonada',note:'',price:2200},
+  {id:'103',cat:'Bebidas / Té',name:'Limonada Grande',note:'',price:4000},
+  {id:'104',cat:'Bebidas / Té',name:'Café de la Olla',note:'',price:3000},
+];
+
+// ── DATA ──
+function getItems() {
+  const stored = localStorage.getItem('tt_items');
+  if (stored) return JSON.parse(stored);
+  localStorage.setItem('tt_items', JSON.stringify(DEFAULT_ITEMS));
+  return DEFAULT_ITEMS;
+}
+function saveItems(items) { localStorage.setItem('tt_items', JSON.stringify(items)); }
+function isLoggedIn() { return sessionStorage.getItem('tt_auth') === '1'; }
+function login() { sessionStorage.setItem('tt_auth', '1'); }
+function logout() { sessionStorage.removeItem('tt_auth'); }
+
+function fmtPrice(p) {
+  return '$' + Number(p).toLocaleString('es-CL');
+}
+
+// ── AUTH ──
+function handleLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-password').value;
+  if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
+    login(); showAdmin();
+  } else {
+    const el = document.getElementById('login-error');
+    el.textContent = 'Correo o contraseña incorrectos.';
+    el.classList.remove('hidden');
+  }
+}
+
+function handleLogout() {
+  logout();
+  document.getElementById('admin').style.display = 'none';
+  document.getElementById('login-page').style.display = 'flex';
+}
+
+// ── VIEWS ──
+function showAdmin() {
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('admin').style.display = 'block';
+  renderItems(); renderQR();
+}
+
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelector(`[data-tab="${name}"]`).classList.add('active');
+  if (name === 'qr') renderQR();
+}
+
+// ── RENDER ADMIN ITEMS ──
+function renderItems() {
+  const items = getItems();
+  const container = document.getElementById('items-list');
+  const cats = {};
+  CAT_ORDER.forEach(c => { if (items.some(i => i.cat === c)) cats[c] = items.filter(i => i.cat === c); });
+  // catch uncategorized
+  items.forEach(i => { if (!CAT_ORDER.includes(i.cat)) { if (!cats[i.cat]) cats[i.cat] = []; cats[i.cat].push(i); } });
+
+  container.innerHTML = Object.entries(cats).map(([cat, citems]) => `
+    <div class="items-table">
+      <div class="table-cat-header">
+        <div class="table-cat-name">${cat}<span class="cnt">${citems.length}</span></div>
+      </div>
+      ${citems.map(item => `
+        <div class="table-row">
+          <div style="flex:1;min-width:0;">
+            <div class="row-name">${item.name}</div>
+            ${item.note ? `<div class="row-note">${item.note}</div>` : ''}
+          </div>
+          <div class="row-price">${fmtPrice(item.price)}</div>
+          <div class="row-actions">
+            <button class="btn-icon" onclick="editItem('${item.id}')">
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M7.5 1l2.5 2.5L3 11H.5V8.5L7.5 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="btn-icon danger" onclick="deleteItem('${item.id}')">
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 2.5h8M4 2.5V1.5h3V2.5M3 2.5l.5 7h4L8 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+// ── ADD/EDIT ──
+function showAddItem() {
+  document.getElementById('modal-title').textContent = 'Agregar plato';
+  document.getElementById('edit-id').value = '';
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-cat').value = 'Tacos de Tijuana';
+  document.getElementById('f-note').value = '';
+  document.getElementById('f-price').value = '';
+  document.getElementById('item-modal').classList.remove('hidden');
+}
+
+function editItem(id) {
+  const item = getItems().find(i => i.id === id);
+  if (!item) return;
+  document.getElementById('modal-title').textContent = 'Editar plato';
+  document.getElementById('edit-id').value = id;
+  document.getElementById('f-name').value = item.name;
+  document.getElementById('f-cat').value = item.cat;
+  document.getElementById('f-note').value = item.note || '';
+  document.getElementById('f-price').value = item.price;
+  document.getElementById('item-modal').classList.remove('hidden');
+}
+
+function closeModal() { document.getElementById('item-modal').classList.add('hidden'); }
+
+function saveItem() {
+  const name = document.getElementById('f-name').value.trim();
+  const cat = document.getElementById('f-cat').value;
+  const note = document.getElementById('f-note').value.trim();
+  const price = document.getElementById('f-price').value;
+  const editId = document.getElementById('edit-id').value;
+  if (!name || !price) { showToast('Completa nombre y precio', 'error'); return; }
+  const items = getItems();
+  if (editId) {
+    const idx = items.findIndex(i => i.id === editId);
+    if (idx > -1) items[idx] = { ...items[idx], name, cat, note, price: parseInt(price) };
+  } else {
+    items.push({ id: Date.now().toString(), name, cat, note, price: parseInt(price) });
+  }
+  saveItems(items); closeModal(); renderItems(); showToast('Guardado', 'success');
+}
+
+function deleteItem(id) {
+  const items = getItems().filter(i => i.id !== id);
+  saveItems(items); renderItems(); showToast('Eliminado');
+}
+
+// ── QR ──
+function getMenuURL() {
+  return `${location.origin}${location.pathname}?menu=tijuana-tacos`;
+}
+
+function renderQR() {
+  const url = getMenuURL();
+  document.getElementById('menu-url-txt').textContent = url;
+  const container = document.getElementById('qr-display');
+  container.innerHTML = '';
+  new QRCode(container, { text: url, width: 180, height: 180, colorDark: '#1c1a17', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.H });
+}
+
+function downloadQR() {
+  const canvas = document.querySelector('#qr-display canvas');
+  if (!canvas) return;
+  const a = document.createElement('a');
+  a.download = 'tijuana-tacos-qr.png'; a.href = canvas.toDataURL(); a.click();
+}
+
+function copyLink() {
+  navigator.clipboard.writeText(getMenuURL()).then(() => showToast('Link copiado', 'success'));
+}
+
+function whatsapp() {
+  window.open(`https://wa.me/?text=${encodeURIComponent('Mira nuestro menú: ' + getMenuURL())}`, '_blank');
+}
+
+// ── PUBLIC MENU ──
+function loadPublicMenu() {
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('public-menu').style.display = 'block';
+  const items = getItems();
+  const cats = {};
+  CAT_ORDER.forEach(c => { if (items.some(i => i.cat === c)) cats[c] = items.filter(i => i.cat === c); });
+
+  document.getElementById('pub-cats').innerHTML = Object.keys(cats).map((c, i) =>
+    `<button class="pub-cat-btn ${i===0?'active':''}" onclick="scrollToCat('${c.replace(/'/g,"\\'")}',this)">${c}</button>`
+  ).join('');
+
+  document.getElementById('pub-content').innerHTML = Object.entries(cats).map(([cat, citems]) => `
+    <div class="pub-section" id="pubcat-${cat.replace(/\s+/g,'-').replace(/[^a-zA-Z0-9-]/g,'')}">
+      <div class="pub-section-title">${cat}</div>
+      ${CAT_NOTES[cat] ? `<div class="pub-section-note">${CAT_NOTES[cat]}</div>` : ''}
+      <div class="pub-items">
+        ${citems.map(item => `
+          <div class="pub-item">
+            <div>
+              <div class="pub-item-name">${item.name}</div>
+              ${item.note ? `<div class="pub-item-note">${item.note}</div>` : ''}
+            </div>
+            <div class="pub-item-price">${fmtPrice(item.price)}</div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function scrollToCat(cat, btn) {
+  document.querySelectorAll('.pub-cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const id = 'pubcat-' + cat.replace(/\s+/g,'-').replace(/[^a-zA-Z0-9-]/g,'');
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── TOAST ──
+let toastT;
+function showToast(msg, type='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast show ' + type;
+  clearTimeout(toastT);
+  toastT = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded', () => {
+  const slug = new URLSearchParams(location.search).get('menu');
+  if (slug === 'tijuana-tacos') { loadPublicMenu(); return; }
+  if (isLoggedIn()) { showAdmin(); return; }
+  document.getElementById('login-page').style.display = 'flex';
+});
+</script>
+</body>
+</html>
